@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+<bean id="propertyPlaceholderConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>placeHolder.properties</value>
+            </list>
+        </property>
+        <property name="systemPropertiesMode" value="1"/>
+    </bean>
+
+    <bean id="placeHolder" class="test.config.PlaceHolder">
+        <property name="sysProperty">
+            <map>
+                <entry key="smc.nsq.host" value="${smc.nsq.host}"></entry>
+                <entry key="smc.nsq.port" value="${smc.nsq.port}"></entry>
+                <entry key="smc.nsq.producer.host" value="${smc.nsq.producer.host}"></entry>
+                <entry key="smc.nsq.producer.port" value="${smc.nsq.producer.port}"></entry>
+            </map>
+        </property>
+    </bean>
+
+</beans>

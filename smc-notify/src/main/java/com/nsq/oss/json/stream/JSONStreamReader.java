@@ -1,0 +1,129 @@
+/**
+ *
+ */
+package com.nsq.oss.json.stream;
+
+import com.nsq.oss.DynMap;
+import com.nsq.oss.DynMapFactory;
+import com.nsq.oss.FileHelper;
+import com.nsq.oss.exceptions.TrendrrException;
+import com.nsq.oss.exceptions.TrendrrIOException;
+import com.nsq.oss.exceptions.TrendrrParseException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.io.*;
+
+
+/**
+ * Provides a way to read streams of json dictionaries.
+ * <p/>
+ * will start a dictionary on the first '{' and finish the
+ * dict on the corresponding
+ * '}'
+ * <p/>
+ * It will ignore any characters between dicts, so any dilimiter can be used.
+ * each dict must be valid, an exception will be thrown on the first parse error.
+ *
+ * @author Dustin Norlander
+ * @created Nov 2, 2011
+ */
+public class JSONStreamReader {
+
+    protected static Log log = LogFactory.getLog(JSONStreamReader.class);
+
+    Reader reader;
+
+    long maxBufferedChars = FileHelper.megsToBytes(4); //max size to write before we assume this is an invalid stream.
+
+    public JSONStreamReader(InputStream stream) {
+        this(new InputStreamReader(stream));
+    }
+
+    public JSONStreamReader(Reader reader) {
+        this.reader = new BufferedReader(reader);
+    }
+
+    public static void main(String... strings) throws TrendrrException {
+        String json = "blah blah{ \"key\" : \"value\"}{ \"key1\" : \"valu\\\"e1}\"}";
+
+        try {
+            json = FileHelper.loadString("tweetparse.json");
+        } catch (Exception e) {
+            log.error("Caught", e);
+        }
+
+        JSONStreamReader reader = new JSONStreamReader(new StringReader(json));
+        DynMap mp;
+        while ((mp = reader.readNext()) != null) {
+            System.out.println(mp.toJSONString());
+        }
+    }
+
+
+    /**
+     * returns null on eof. throws exception or returns parsed object.
+     *
+     * @return
+     * @throws java.io.IOException
+     */
+    public DynMap readNext() throws TrendrrException {
+        StringBuilder json = new StringBuilder("{");
+        try {
+            long numRead = 0;
+            int openBrackets = 1;
+            boolean isQuote = false;
+            boolean isEscape = false;
+
+            //read until the first open bracket
+            int current = this.reader.read();
+            while (current != '{' && current != -1) {
+                numRead++;
+                if (numRead > this.maxBufferedChars) {
+                    throw new TrendrrParseException("Read " + this.maxBufferedChars + " chars without a valid json dict.  Beginning with: " + json.substring(0, 256));
+                }
+                current = this.reader.read();
+            }
+
+            do {
+                current = this.reader.read();
+                if (current == -1) {
+                    return null;
+                }
+                char c = (char) current;
+                json.append(c);
+                if (!isQuote) {
+                    if (c == '{') {
+                        openBrackets++;
+                    } else if (c == '}') {
+                        openBrackets--;
+                    }
+                }
+                if (c == '"' && !isEscape) {
+                    isQuote = !isQuote;
+                }
+
+                if (isQuote && !isEscape && c == '\\') {
+                    isEscape = true;
+                } else {
+                    isEscape = false;
+                }
+
+                numRead++;
+                if (numRead > this.maxBufferedChars) {
+                    throw new TrendrrParseException("Read " + this.maxBufferedChars + " chars without a valid json dict.  Beginning with: " + json.substring(0, 256));
+                }
+            } while (openBrackets != 0);
+
+            DynMap dm = DynMapFactory.instanceFromJSON(json.toString());
+            if (dm == null) {
+                throw new TrendrrParseException("unable to parse json string");
+            }
+            return dm;
+        } catch (IOException x) {
+            throw new TrendrrIOException(x);
+        }
+    }
+
+
+}

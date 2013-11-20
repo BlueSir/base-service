@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxActive" value="200" />
+        <property name="maxIdle" value="50" />
+        <property name="maxWait" value="1000" />
+        <property name="testOnBorrow" value="false" />
+    </bean>
+
+    <bean name="smc_counter_pool" class="com.sohu.smc.counter.common.JedisBean">
+        <property name="masterAddress">
+            <value>10.13.81.18:6381</value>
+        </property>
+        <property name="slaveAddress">
+            <value>10.13.81.19:6381</value>
+        </property>
+    </bean>
+
+    <bean name="smc_counter_pool_test" class="com.sohu.smc.counter.common.JedisBean">
+        <property name="masterAddress">
+            <value>10.10.76.14:6379</value>
+        </property>
+        <property name="password">
+            <value>smcadmin</value>
+        </property>
+    </bean>
+</beans>

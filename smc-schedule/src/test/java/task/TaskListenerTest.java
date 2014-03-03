@@ -28,7 +28,7 @@ public class TaskListenerTest {
             @Override
             public boolean executeTask(String message) throws Exception {
                 System.out.println("=====================================");
-                return true;
+                return false;
             }
         });
     }

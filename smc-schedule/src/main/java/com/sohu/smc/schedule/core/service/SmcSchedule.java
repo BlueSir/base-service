@@ -18,7 +18,23 @@ import org.slf4j.LoggerFactory;
  */
 public class SmcSchedule {
     private static final Logger LOG = LoggerFactory.getLogger(SmcSchedule.class);
+
+    /**
+     * 执行分页式任务，并为其增加监听器
+     * @param scheduleName 任务的名称，跟任务系统上注册的相同
+     * @param scheduleListener 任务执行的监听器，具体业务就是在这里实现的
+     */
     public static void execute(String scheduleName, final ScheduleListener scheduleListener){
+        execute(scheduleName, scheduleListener, 3);
+    }
+
+    /**
+     * 执行分页式任务，并为其增加监听器
+     * @param scheduleName 任务的名称，跟任务系统上注册的相同
+     * @param scheduleListener 任务执行的监听器，具体业务就是在这里实现的
+     * @param retry 如果业务执行执行失败，可以重试的次数
+     */
+    public static void execute(String scheduleName, final ScheduleListener scheduleListener, int retry){
         Consumers.registerTopic("SCHEDULE_" + scheduleName, new ConsumerListener() {
             @Override
             public boolean excute(Message message) {
@@ -60,6 +76,6 @@ public class SmcSchedule {
                 }
                 return true;
             }
-        });
+        }, retry);
     }
 }

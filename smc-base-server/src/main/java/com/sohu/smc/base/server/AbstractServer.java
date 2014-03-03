@@ -122,9 +122,14 @@ public abstract class AbstractServer {
 
     private HandlerCollection createHandlers() {
 
-        System.setProperty("jetty.home", "/tmp/");
+        System.setProperty("jetty.home", "work/");
 
         WebAppContext _ctx = new WebAppContext();
+        File tempDir = new File("work/");
+        if(!tempDir.exists()){
+            tempDir.mkdir();
+        }
+        _ctx.setTempDirectory(tempDir);
         _ctx.setContextPath("/base");
 //        _ctx.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false");
 

@@ -7,6 +7,6 @@ package com.smc.local.cache;
  * Time: 下午4:01
  * To change this template use File | Settings | File Templates.
  */
-public interface RemoveCallBack {
-    Object getItem(String key);
+public interface RemoveCallBack<K, V> {
+    V getItem(K key);
 }

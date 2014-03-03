@@ -26,6 +26,7 @@ public class TimedCacheFactory<K, V> {
     private boolean needSync;
     private NSQProducer producer;
     private String topic;
+    private RemoveCallBack<K, V> removeCallBack;
 
     /**
      * 非同步清理缓存的构造方法
@@ -71,6 +72,7 @@ public class TimedCacheFactory<K, V> {
         this.module = module;
         producer = Notify.producer;
         this.needSync = true;
+        this.removeCallBack = callBack;
         if(StringUtils.isNotBlank(topic)){
             this.topic = topic;
         } else {
@@ -317,7 +319,12 @@ public class TimedCacheFactory<K, V> {
                 logger.error("", e);
             }
         }
-        return (V) timedCache.remove(key);
+        V oldValue = (V) timedCache.remove(key);
+        if(removeCallBack != null && oldValue != null){
+            V newValue = removeCallBack.getItem(key);
+            timedCache.put(key, newValue);
+        }
+        return oldValue;
     }
 
     /**
@@ -370,8 +377,8 @@ public class TimedCacheFactory<K, V> {
                     }
                     String moduleName = msgs[0];
                     String key = msgs[1];
-                    if (StringUtils.equals(host.toString(), Notify.identification.toString())) return true;
                     TimedCacheFactory instance = INSTANCE_LIST.get(moduleName);
+                    if (StringUtils.equals(host.toString(), Notify.identification.toString())) return true;
                     if (instance == null) return true;
 
                     //删除本地缓存
@@ -387,10 +394,12 @@ public class TimedCacheFactory<K, V> {
                             } else {
                                 cache.remove(key);
                             }
+                            break;
                         }
                         case LOCAL_CACHE_REFRUSH_GROUP: {
                             //刷新分组缓存的分组
                             instance.getTimedCache().refrushGroup(key);
+                            break;
                         }
                     }
                 } catch (Exception e) {
@@ -399,7 +408,7 @@ public class TimedCacheFactory<K, V> {
                 }
                 return true;
             }
-        });
+        }, 5);
     }
 
     public static void main(String[] args) throws Exception {

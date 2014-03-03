@@ -1,7 +1,9 @@
 package com.nsq;
 
 import com.smc.notify.util.JsonUtil;
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Created with IntelliJ IDEA.
@@ -56,6 +58,21 @@ public class Message {
         this.p = host.getPort();
         this.m = message;
     }
+    public Message(String message){
+        this.m = message;
+    }
+
+    public Message(String host, int port, String message){
+        this.h = host;
+        this.p = port;
+        this.m = message;
+    }
+
+    public Message(Host host , String message){
+        this.h = host.getHost();
+        this.p = host.getPort();
+        this.m = message;
+    }
 
     public String getT() {
         return t;
@@ -95,7 +112,15 @@ public class Message {
     }
 
     public static Message convert(String json){
-        Message msg = (Message) JSONObject.toBean(JSONObject.fromObject(json), Message.class);
+        if(StringUtils.isBlank(json)) return null;
+        Message msg = null;
+        try{
+            JSONObject jsonObject = JSONObject.fromObject(json);
+            msg = (Message) JSONObject.toBean(jsonObject, Message.class);
+        }catch (JSONException e){
+            msg = new Message();
+            msg.setM(json);
+        }
         return msg;
     }
 }

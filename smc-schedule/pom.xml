@@ -19,7 +19,6 @@
         <dependency>
             <groupId>com.sohu.smc</groupId>
             <artifactId>smc-configuration</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.sohu.smc</groupId>

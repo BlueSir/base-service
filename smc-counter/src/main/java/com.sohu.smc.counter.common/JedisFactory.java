@@ -2,7 +2,6 @@ package com.sohu.smc.counter.common;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -24,8 +23,6 @@ public class JedisFactory {
     public static synchronized void init() {
         resource = new ClassPathResource("smc-counter-redis.xml");
         ctx = new XmlBeanFactory(resource);
-        PropertyPlaceholderConfigurer configurer = ctx.getBean(PropertyPlaceholderConfigurer.class);
-        configurer.postProcessBeanFactory((XmlBeanFactory)ctx);
     }
 
     JedisBean bean = null;

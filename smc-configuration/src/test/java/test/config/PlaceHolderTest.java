@@ -19,12 +19,12 @@ import java.util.Map;
  */
 public class PlaceHolderTest {
     public static void main(String[] args){
-        SmcConfiguration.applyPlaceHolder();
+        SmcConfiguration.init();
         Resource resource = new ClassPathResource("context.xml");
         BeanFactory ctx = new XmlBeanFactory(resource);
 
-        PropertyPlaceholderConfigurer configurer = (PropertyPlaceholderConfigurer) ctx.getBean("propertyPlaceholderConfigurer");
-        configurer.setSystemPropertiesMode(2);
+        PropertyPlaceholderConfigurer configurer = new PropertyPlaceholderConfigurer();
+        configurer.setSystemPropertiesMode(1);
         configurer.postProcessBeanFactory((XmlBeanFactory) ctx);
 
         PlaceHolder placeHolder = (PlaceHolder) ctx.getBean("placeHolder");

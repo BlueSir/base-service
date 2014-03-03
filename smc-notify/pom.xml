@@ -14,6 +14,7 @@
         <dependency>
             <groupId>com.sohu.smc</groupId>
             <artifactId>smc-configuration</artifactId>
+            <version>1.1-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jboss.netty</groupId>
@@ -41,6 +42,10 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
 

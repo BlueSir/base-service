@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!--time rolling log-->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <Encoding>UTF-8</Encoding>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} |-%-5level %logger{80} - %msg%n</pattern>
+        </layout>
+    </appender>
+
+    <!--fix size log-->
+    <!--
+    <appender name="fixed-rolling" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${server_log_home}/${server_name}.log</File>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${server_log_home}/logbak/${server_name}_log_%i.zip</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>5</maxIndex>
+        </rollingPolicy>
+
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>512MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} |-%-5level %logger{80} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    -->
+
+    <!--
+    <appender name="fileAppender" class="ch.qos.logback.core.FileAppender">
+        <File>${server_log_home}/${server_name}.log</File>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} |-%-5level %logger{80} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    -->
+
+    <!--async append log-->
+    <appender name="asynAppender" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="console"/>
+    </appender>
+
+    <root>
+        <appender-ref ref="asynAppender"/>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </root>
+</configuration>

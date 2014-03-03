@@ -23,12 +23,12 @@ public class SmcConfigurationTest extends TestCase{
 //        SmcConfiguration.setZkProperty("smc.user.test3", "value3");
 //        SmcConfiguration.setZkProperty("smc.user.test3", "value3");
         Thread.sleep(2000);
-        Map<String, Map<String,Object>> properties = SmcConfiguration.properties();
+        Map<String, Map<String, Map<String, Object>>> properties = SmcConfiguration.properties();
         Iterator<String> prefixIt = properties.keySet().iterator();
         while(prefixIt.hasNext()){
             String prefix = prefixIt.next();
 
-            Map<String, Object> values = properties.get(prefix);
+            Map<String, Map<String, Object>> values = properties.get(prefix);
             Iterator<String> valuesIt = values.keySet().iterator();
             while(valuesIt.hasNext()){
                 String key = valuesIt.next();

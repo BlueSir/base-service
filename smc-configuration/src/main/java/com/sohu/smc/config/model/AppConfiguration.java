@@ -1,7 +1,10 @@
 package com.sohu.smc.config.model;
 
 import com.netflix.config.*;
+import com.sohu.smc.config.conf.ServerEnvEnum;
 import com.sohu.smc.config.service.SmcConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,10 +14,14 @@ import com.sohu.smc.config.service.SmcConfiguration;
  * To change this template use File | Settings | File Templates.
  */
 public class AppConfiguration {
+    static final Logger LOG = LoggerFactory.getLogger(AppConfiguration.class);
     static{
         SmcConfiguration.init();
     }
 
+    public static boolean isTestMachin(){
+        return SmcConfiguration.environment != ServerEnvEnum.ONLINE && SmcConfiguration.environment != ServerEnvEnum.PRE;
+    }
     /**
      * 从配置中心获取String类型的配置值
      * @param key　配置中心设置的Key
@@ -22,8 +29,7 @@ public class AppConfiguration {
      * @return　能动态获取最新配置值的对象
      */
     public static DynamicStringProperty getString(String key, String defaultValue) {
-        final DynamicStringProperty property = DynamicPropertyFactory.getInstance().getStringProperty(key, defaultValue);
-        return property;
+        return getString(key, defaultValue, null);
     }
 
     /**
@@ -33,8 +39,7 @@ public class AppConfiguration {
      * @return　能动态获取最新配置值的对象
      */
     public static DynamicIntProperty getInt(String key, int defaultValue) {
-        final DynamicIntProperty property = DynamicPropertyFactory.getInstance().getIntProperty(key, defaultValue);
-        return property;
+        return getInt(key, defaultValue, null);
     }
 
     /**
@@ -44,8 +49,7 @@ public class AppConfiguration {
      * @return　能动态获取最新配置值的对象
      */
     public static DynamicLongProperty getLong(String key, int defaultValue) {
-        final DynamicLongProperty property = DynamicPropertyFactory.getInstance().getLongProperty(key, defaultValue);
-        return property;
+        return getLong(key, defaultValue, null);
     }
 
     /**
@@ -55,8 +59,7 @@ public class AppConfiguration {
      * @return　能动态获取最新配置值的对象
      */
     public static DynamicBooleanProperty getBoolean(String key, boolean defaultValue) {
-        final DynamicBooleanProperty property = DynamicPropertyFactory.getInstance().getBooleanProperty(key, defaultValue);
-        return property;
+        return getBoolean(key, defaultValue, null);
     }
     /**
      * 从配置中心获取double类型的配置值
@@ -66,8 +69,7 @@ public class AppConfiguration {
      * @return　能动态获取最新配置值的对象
      */
     public static DynamicDoubleProperty getDouble(String key, double defaultValue) {
-        final DynamicDoubleProperty property = DynamicPropertyFactory.getInstance().getDoubleProperty(key, defaultValue);
-        return property;
+        return getDouble(key, defaultValue, null);
     }
 
     /**
@@ -77,7 +79,12 @@ public class AppConfiguration {
      * @return　能动态获取最新配置值的对象
      */
     public static DynamicStringProperty getString(String key, String defaultValue, Runnable propertyChangeCallback) {
-        final DynamicStringProperty property = DynamicPropertyFactory.getInstance().getStringProperty(key, defaultValue, propertyChangeCallback);
+        DynamicStringProperty property = null;
+        if(isTestMachin() && SmcConfiguration.overridePropertyMap.containsKey(key)){
+            return new OverrideDynamicStringProperty(key, SmcConfiguration.overridePropertyMap.get(key));
+        }
+        property = DynamicPropertyFactory.getInstance().getStringProperty(key, defaultValue, propertyChangeCallback);
+        LOG.info("[smc-configuration]:Get String from configuration.key="+key+", value="+property.get());
         return property;
     }
 
@@ -88,7 +95,13 @@ public class AppConfiguration {
      * @return　能动态获取最新配置值的对象
      */
     public static DynamicIntProperty getInt(String key, int defaultValue, Runnable propertyChangeCallback) {
-        final DynamicIntProperty property = DynamicPropertyFactory.getInstance().getIntProperty(key, defaultValue, propertyChangeCallback);
+        DynamicIntProperty property = null;
+        if(isTestMachin() && SmcConfiguration.overridePropertyMap.containsKey(key)){
+            property = new OverrideDynamicIntProperty(key, Integer.parseInt(SmcConfiguration.overridePropertyMap.get(key)));
+            return property;
+        }
+        property = DynamicPropertyFactory.getInstance().getIntProperty(key, defaultValue, propertyChangeCallback);
+        LOG.info("[smc-configuration]:Get int from configuration.key="+key+", value="+property.get());
         return property;
     }
 
@@ -99,7 +112,13 @@ public class AppConfiguration {
      * @return　能动态获取最新配置值的对象
      */
     public static DynamicLongProperty getLong(String key, int defaultValue, Runnable propertyChangeCallback) {
-        final DynamicLongProperty property = DynamicPropertyFactory.getInstance().getLongProperty(key, defaultValue, propertyChangeCallback);
+        DynamicLongProperty property = null;
+        if(isTestMachin() && SmcConfiguration.overridePropertyMap.containsKey(key)){
+            property = new OverrideDynamicLongProperty(key, Long.parseLong(SmcConfiguration.overridePropertyMap.get(key)));
+            return property;
+        }
+        property = DynamicPropertyFactory.getInstance().getLongProperty(key, defaultValue, propertyChangeCallback);
+        LOG.info("[smc-configuration]:Get long from configuration.key="+key+", value="+property.get());
         return property;
     }
 
@@ -110,7 +129,13 @@ public class AppConfiguration {
      * @return　能动态获取最新配置值的对象
      */
     public static DynamicBooleanProperty getBoolean(String key, boolean defaultValue, Runnable propertyChangeCallback) {
-        final DynamicBooleanProperty property = DynamicPropertyFactory.getInstance().getBooleanProperty(key, defaultValue, propertyChangeCallback);
+        DynamicBooleanProperty property = null;
+        if(isTestMachin() && SmcConfiguration.overridePropertyMap.containsKey(key)){
+            property = new OverrideDynamicBooleanProperty(key, Boolean.parseBoolean(SmcConfiguration.overridePropertyMap.get(key)));
+            return property;
+        }
+        property = DynamicPropertyFactory.getInstance().getBooleanProperty(key, defaultValue, propertyChangeCallback);
+        LOG.info("[smc-configuration]:Get boolean from configuration.key="+key+", value="+property.get());
         return property;
     }
     /**
@@ -121,9 +146,14 @@ public class AppConfiguration {
      * @return　能动态获取最新配置值的对象
      */
     public static DynamicDoubleProperty getDouble(String key, double defaultValue, Runnable propertyChangeCallback) {
-        final DynamicDoubleProperty property = DynamicPropertyFactory.getInstance().getDoubleProperty(key, defaultValue, propertyChangeCallback);
+        DynamicDoubleProperty property = null;
+        if(isTestMachin() && SmcConfiguration.overridePropertyMap.containsKey(key)){
+            property = new OverrideDynamicDoubleProperty(key, Double.parseDouble(SmcConfiguration.overridePropertyMap.get(key)));
+            return property;
+        }
+        property = DynamicPropertyFactory.getInstance().getDoubleProperty(key, defaultValue, propertyChangeCallback);
+        LOG.info("[smc-configuration]:Get double from configuration.key="+key+", value="+property.get());
         return property;
     }
-
 
 }

@@ -33,7 +33,9 @@ public class ScheduleJob implements Job {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
+        if(context == null) return;
         JobDetail jobDetail = context.getJobDetail();
+        if(jobDetail == null) return;
         String scheduleName = jobDetail.getKey().getName();
         String serverName = jobDetail.getKey().getGroup();
         String desc = jobDetail.getDescription();

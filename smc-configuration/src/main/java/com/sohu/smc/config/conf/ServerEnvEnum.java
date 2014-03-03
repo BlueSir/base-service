@@ -13,19 +13,19 @@ public enum ServerEnvEnum {
     /**
      * 线上环境
      */
-    ONLINE("ONLINE"),
+    ONLINE("online"),
     /**
      * 开发环境
      */
-    DEV("DEV"),
+    DEV("dev"),
     /**
      * 测试环境
      */
-    TEST("TEST"),
+    TEST("test"),
     /**
      * 预发布环境
      */
-    PRE("PRE");
+    PRE("pre");
 
     public String code;
 

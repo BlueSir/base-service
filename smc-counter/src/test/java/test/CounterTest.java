@@ -1,6 +1,5 @@
 package test;
 
-import com.sohu.smc.config.service.SmcConfiguration;
 import com.sohu.smc.counter.model.CounterKey;
 import com.sohu.smc.counter.service.Counters;
 
@@ -9,11 +8,11 @@ import com.sohu.smc.counter.service.Counters;
  * User: jingxc
  * Date: 10/16/13
  * Time: 10:11 AM
+ * To change this template use File | Settings | File Templates.
  */
 public class CounterTest {
 
     public static void main(String[] args) throws InterruptedException {
-        SmcConfiguration.applyPlaceHolder();
         CounterKey key = new CounterKey().append("productId", 1001).append("subId",1447);
 //        Counters.CLIENT_SUB_COUNTER.reset(key,1);
         Thread.sleep(3*1000);

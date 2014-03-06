@@ -25,7 +25,7 @@ import java.util.Set;
  */
 public class DataStore {
     static final Logger LOG = LoggerFactory.getLogger(DataStore.class);
-    private String dataDir = AppConfiguration.getString("smc.api.SQLite.dataDir","~/data").get();
+    private String dataDir = AppConfiguration.getString("smc.api.SQLite.dataDir","data").get();
     private String tableName;
     private String dbName;
 
@@ -54,6 +54,7 @@ public class DataStore {
         try {
             conn = DriverManager.getConnection("jdbc:sqlite:" + dbName);
         } catch (SQLException e) {
+            e.printStackTrace();
             LOG.error("[getConnection]:Throws Exception.", e);
         }
         return conn;
@@ -74,13 +75,13 @@ public class DataStore {
         return result;
     }
 
-    public int[] batchInsert(final List<Long> items){
+    public int[] batchInsert(final Set<Long> items){
 
-        final String sql = "insert into "+this.tableName + " values(%d)";
+        final String sql = "REPLACE into "+this.tableName + " values(%d)";
         Callable callable = new Callable() {
             @Override
             public Object call() throws Exception {
-                Connection connection = null;
+                Connection connection = getConnection();
                 Statement statement = null;
                 try {
                     connection.setAutoCommit(false);
@@ -90,8 +91,10 @@ public class DataStore {
                     }
                     int[] result = statement.executeBatch();
                     connection.commit();
+                    LOG.info("[batchInsert]:Batch insert into " + tableName +" success,size="+items.size()+".");
                     return result;
                 } catch (SQLException e) {
+                    e.printStackTrace();
                     LOG.error("[batchUpdate]:Throws Exception.", e);
                 }finally {
                     close(connection);
@@ -111,12 +114,45 @@ public class DataStore {
         return null;
     }
 
-    public int[] batchDelete(final List<Long> items){
+    public int insert(final long item){
+
+        final String sql = "REPLACE into "+this.tableName + " values(%d)";
+        Callable callable = new Callable() {
+            @Override
+            public Integer call() throws Exception {
+                Connection connection = getConnection();
+                Statement statement = null;
+                try {
+                    statement = connection.createStatement();
+                    int result = statement.executeUpdate(String.format(sql, item));
+                    LOG.info("[insert]:Insert into " + tableName +" success,item="+ item +".");
+                    return result;
+                } catch (SQLException e) {
+                    LOG.error("[insert]:Throws Exception.", e);
+                }finally {
+                    close(connection);
+                }
+                return 0;
+            }
+        };
+
+        Future future = Executors.newSingleThreadExecutor().submit(callable);
+        try {
+            return (Integer) future.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int[] batchDelete(final Set<Long> items){
         final String sql = "delete from "+this.tableName+" where item=%d";
         Callable callable = new Callable() {
             @Override
             public int[] call() throws Exception {
-                Connection connection = null;
+                Connection connection = getConnection();
                 Statement statement = null;
                 try {
                     connection.setAutoCommit(false);
@@ -126,6 +162,7 @@ public class DataStore {
                     }
                     int[] result = statement.executeBatch();
                     connection.commit();
+                    LOG.info("[batchDelete]:Batch delete from " + tableName +" success,size="+items.size()+".");
                     return result;
                 } catch (SQLException e) {
                     LOG.error("[batchUpdate]:Throws Exception.", e);
@@ -150,7 +187,7 @@ public class DataStore {
     public void createTable(){
         if(isTableExsist()) return;
         Connection conn = getConnection();
-        String sql="create table "+ this.tableName +"(item long primary key)";
+        String sql="create table IF NOT EXISTS "+ this.tableName +"(item long primary key)";
         execute(sql, conn);
         close(conn);
     }
@@ -160,7 +197,7 @@ public class DataStore {
         Connection conn = getConnection();
         ResultSet rsTables = null;
         try {
-            rsTables = conn.getMetaData().getTables(null, null, dbName, null);
+            rsTables = conn.getMetaData().getTables(null, null, tableName, null);
             if(rsTables.next()){
                 return true;
             }
@@ -194,6 +231,7 @@ public class DataStore {
                 } finally {
                     close(connection);
                 }
+                LOG.info("[queryAll]:queryAll from " + tableName +"success,size="+activeUser.size()+".");
                 return activeUser;
             }
         };

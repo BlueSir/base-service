@@ -10,10 +10,7 @@ import kafka.message.MessageAndMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,25 +22,26 @@ public class KafkaConsumer {
     private MessageExecutor executor;
     private ConsumerConnector connector;
     private ExecutorService threadPool;
+    private int batchSize;
     public KafkaConsumer(String module, String topic, int partitionsNum, MessageExecutor executor) throws Exception{
         this(module, topic, partitionsNum, "lively-group", executor);
     }
 
     public KafkaConsumer(String module, final String topic, final int partitionsNum, final String groupId, final MessageExecutor executor) throws Exception{
         final Properties properties = new Properties();
-        properties.put("zookeeper.connect", AppConfiguration.getString("smc.kafka." + module + ".zk",""));
-        properties.put("zookeeper.connectiontimeout.ms", AppConfiguration.getLong("smc.kafka." + module + ".zk.timeout.ms", 10000));
+        properties.put("zookeeper.connect", AppConfiguration.getString("smc.kafka." + module + ".zk","127.0.0.1:2181").get());
+        properties.put("zookeeper.connectiontimeout.ms", AppConfiguration.getString("smc.kafka." + module + ".zk.timeout.ms", "10000").get());
         properties.put("group.id", groupId);
-        properties.put("consumer.timeout.ms", AppConfiguration.getLong("smc.kafka." + module + ".consumer.timeout.ms", 5000));
-        properties.put("auto.commit.enable", AppConfiguration.getBoolean("smc.kafka." + module + ".auto.commit.enable", true));
-        properties.put("auto.commit.interval.ms", AppConfiguration.getLong("smc.kafka." + module + ".auto.commit.interval.ms", 10000));
+//        properties.put("consumer.timeout.ms", AppConfiguration.getString("smc.kafka." + module + ".consumer.timeout.ms", "10000").get());
+        properties.put("auto.commit.enable", AppConfiguration.getString("smc.kafka." + module + ".auto.commit.enable", "false").get());
+        properties.put("auto.commit.interval.ms", AppConfiguration.getString("smc.kafka." + module + ".auto.commit.interval.ms", "10000").get());
+        final int batchSize = AppConfiguration.getInt("smc.kafka." + module + ".concumer.batch.size", 100).get(); //批量消费的大小
         AppConfiguration.getString("smc.kafka." + module + ".consumer.version", "1.0", new Runnable() {
             @Override
             public void run() {
                 LOG.info("[consumer.restart]:topic="+topic);
                 close();
-                init(properties, topic, partitionsNum, groupId, executor);
-
+                init(properties, topic, partitionsNum, groupId, executor, batchSize);
                 try {
                     start();
                 } catch (Exception e) {
@@ -51,15 +49,16 @@ public class KafkaConsumer {
                     LOG.error("[consumer.restart]:Throws exception", e);
                 }
             }
-        });
-        init(properties, topic, partitionsNum, groupId, executor);
+        }).get();
+        init(properties, topic, partitionsNum, groupId, executor, batchSize);
     }
 
-    public void init(Properties properties, String topic, int partitionsNum, String groupId, MessageExecutor executor){
+    public void init(Properties properties, String topic, int partitionsNum, String groupId, MessageExecutor executor, int batchSize){
         config = new ConsumerConfig(properties);
         this.topic = topic;
         this.partitionsNum = partitionsNum;
         this.executor = executor;
+        this.batchSize = batchSize;
     }
 
     public void start() throws Exception{
@@ -98,18 +97,18 @@ public class KafkaConsumer {
 
         public void run(){
             ConsumerIterator<byte[], byte[]> it = partition.iterator();
+            Set<String> messages = new HashSet<String>();
             while(it.hasNext()){
-                //connector.commitOffsets();手动提交offset,当autocommit.enable=false时使用
                 MessageAndMetadata<byte[],byte[]> item = it.next();
-                LOG.debug("[consumer.run]:partition=" + item.partition() + ",offset=" + item.offset());
-                executor.execute(new String(item.message()));//UTF-8,注意异常
+                messages.add(new String(item.message()));
+                if(messages.size() == batchSize){
+                    System.out.println("partiton:" + item.partition() + ",offset:" + item.offset() + ",lastMessage:" + new String(item.message()));
+                    executor.execute(messages);//UTF-8,注意异常
+                    messages.clear();
+                    connector.commitOffsets();//手动提交offset,当autocommit.enable=false时使用
+                }
             }
         }
-    }
-
-    interface MessageExecutor {
-
-        public void execute(String message);
     }
 
     /**
@@ -120,8 +119,8 @@ public class KafkaConsumer {
         try{
             MessageExecutor executor = new MessageExecutor() {
 
-                public void execute(String message) {
-                    System.out.println("=================" + message);
+                public void execute(Set<String> message) {
+                    System.out.println("=================" + message.size());
 
                 }
             };

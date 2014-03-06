@@ -25,20 +25,20 @@ public class KafkaProducer {
     private Producer<String,String> inner;
     KafkaProducer(final String module){
         Properties properties = new Properties();
-        properties.put("partitioner.class", AppConfiguration.getString("smc.kafka." + module + ".partitioner.class", ""));
-        properties.put("metadata.broker.list", AppConfiguration.getString("smc.kafka." + module + ".metadata.broker.list", ""));
-        properties.put("producer.type", AppConfiguration.getString("smc.kafka." + module + ".producer.type", "sync"));
-        properties.put("compression.codec",AppConfiguration.getInt("smc.kafka." + module + ".compression.codec", 0));
-        properties.put("serializer.class", AppConfiguration.getString("smc.kafka." + module + ".serializer.class", "kafka.serializer.StringEncoder"));
-        properties.put("batch.num.messages", AppConfiguration.getInt("smc.kafka." + module + ".batch.num.messages", 100));
+//        properties.put("partitioner.class", AppConfiguration.getString("smc.kafka." + module + ".partitioner.class", "").get());
+        properties.put("metadata.broker.list", AppConfiguration.getString("smc.kafka." + module + ".metadata.broker.list", "localhost:9093").get());
+        properties.put("producer.type", AppConfiguration.getString("smc.kafka." + module + ".producer.type", "sync").get());
+        properties.put("compression.codec",AppConfiguration.getString("smc.kafka." + module + ".compression.codec", "0").get());
+        properties.put("serializer.class", AppConfiguration.getString("smc.kafka." + module + ".serializer.class", "kafka.serializer.StringEncoder").get());
+        properties.put("batch.num.messages", AppConfiguration.getString("smc.kafka." + module + ".batch.num.messages", "100").get());
         final ProducerConfig config = new ProducerConfig(properties);
-        AppConfiguration.getString("smc.kafka." + module + ".producer.version", "1.0", new Runnable() {
+        String version = AppConfiguration.getString("smc.kafka." + module + ".producer.version", "1.0", new Runnable() {
             @Override
             public void run() {
                 LOG.info("[producer.restart]:module="+module);
                 inner = new Producer<String, String>(config);
             }
-        });
+        }).get();
         inner = new Producer<String, String>(config);
     }
 

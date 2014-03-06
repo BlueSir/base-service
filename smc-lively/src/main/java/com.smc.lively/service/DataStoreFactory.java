@@ -12,16 +12,22 @@ import java.util.concurrent.ConcurrentHashMap;
  * To change this template use File | Settings | File Templates.
  */
 public class DataStoreFactory {
-    private static ConcurrentHashMap<LivelyItemEnum, DataStore> SERVICE_MAP = new ConcurrentHashMap<LivelyItemEnum, DataStore>();
+    private static ConcurrentHashMap<String, DataStore> SERVICE_MAP = new ConcurrentHashMap<String, DataStore>();
 
     public static DataStore getInstance(LivelyItemEnum livelyItemEnum){
         DataStore dataStore = null;
-        if(SERVICE_MAP.contains(livelyItemEnum.name)){
-            dataStore = SERVICE_MAP.get(livelyItemEnum);
+        if(SERVICE_MAP.containsKey(livelyItemEnum.name)){
+            dataStore = SERVICE_MAP.get(livelyItemEnum.name);
         } else{
             dataStore = new DataStore(livelyItemEnum.name);
-            SERVICE_MAP.put(livelyItemEnum, dataStore);
+            SERVICE_MAP.put(livelyItemEnum.name, dataStore);
         }
         return dataStore;
+    }
+
+    public static void main(String[] args){
+        DataStoreFactory.getInstance(LivelyItemEnum.CID_1_DAY);
+        DataStoreFactory.getInstance(LivelyItemEnum.CID_1_DAY);
+        DataStoreFactory.getInstance(LivelyItemEnum.CID_1_DAY);
     }
 }

@@ -21,7 +21,7 @@ public class LivelyServiceTest {
         for (int i=0;i<100;i++){
             TimeUnit.SECONDS.sleep(2);
             counter ++;
-            System.out.println(counter +":" + LivelyService.getInstance().isLively(LivelyItemEnum.CID_TEST, counter));
+            System.out.println(counter +":" + LivelyService.getInstance().isLively(LivelyItemEnum.CID_3_DAY, 50323423909234l));
         }
     }
 }

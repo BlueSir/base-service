@@ -1,6 +1,7 @@
 package com.sohu.smc.base.server;
 
 
+import com.smc.lively.enums.LivelyItemEnum;
 import com.smc.notify.Notify;
 import com.sohu.smc.schedule.core.util.SchedulerHolder;
 import org.quartz.SchedulerException;
@@ -27,6 +28,9 @@ public class SmcBaseServer extends AbstractServer {
         } catch (SchedulerException e) {
             e.printStackTrace();
         }
+
+        //活跃用户池的定时任务
+        LivelyItemEnum.executeTask();
 
     }
 

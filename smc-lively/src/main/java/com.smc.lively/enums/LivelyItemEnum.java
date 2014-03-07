@@ -47,6 +47,7 @@ public enum LivelyItemEnum {
         }
     };
     public String name;
+    //数据保存的天数
     public int days;
     public String desc;
     //定时任务执行的时间间隔，以小时为单位

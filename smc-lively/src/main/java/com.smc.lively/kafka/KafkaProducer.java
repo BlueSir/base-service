@@ -26,11 +26,11 @@ public class KafkaProducer {
     KafkaProducer(final String module){
         Properties properties = new Properties();
 //        properties.put("partitioner.class", AppConfiguration.getString("smc.kafka." + module + ".partitioner.class", "").get());
-        properties.put("metadata.broker.list", AppConfiguration.getString("smc.kafka." + module + ".metadata.broker.list", "localhost:9093").get());
+        properties.put("metadata.broker.list", AppConfiguration.getString("smc.kafka." + module + ".producer.metadata.broker.list", "localhost:9093").get());
         properties.put("producer.type", AppConfiguration.getString("smc.kafka." + module + ".producer.type", "sync").get());
-        properties.put("compression.codec",AppConfiguration.getString("smc.kafka." + module + ".compression.codec", "0").get());
-        properties.put("serializer.class", AppConfiguration.getString("smc.kafka." + module + ".serializer.class", "kafka.serializer.StringEncoder").get());
-        properties.put("batch.num.messages", AppConfiguration.getString("smc.kafka." + module + ".batch.num.messages", "100").get());
+        properties.put("compression.codec",AppConfiguration.getString("smc.kafka." + module + ".producer.compression.codec", "0").get());
+        properties.put("serializer.class", AppConfiguration.getString("smc.kafka." + module + ".producer.serializer.class", "kafka.serializer.StringEncoder").get());
+        properties.put("batch.num.messages", AppConfiguration.getString("smc.kafka." + module + ".producer.batch.num.messages", "100").get());
         final ProducerConfig config = new ProducerConfig(properties);
         String version = AppConfiguration.getString("smc.kafka." + module + ".producer.version", "1.0", new Runnable() {
             @Override

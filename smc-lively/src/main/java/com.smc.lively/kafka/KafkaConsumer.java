@@ -29,12 +29,12 @@ public class KafkaConsumer {
 
     public KafkaConsumer(String module, final String topic, final int partitionsNum, final String groupId, final MessageExecutor executor) throws Exception{
         final Properties properties = new Properties();
-        properties.put("zookeeper.connect", AppConfiguration.getString("smc.kafka." + module + ".zk","127.0.0.1:2181").get());
-        properties.put("zookeeper.connectiontimeout.ms", AppConfiguration.getString("smc.kafka." + module + ".zk.timeout.ms", "10000").get());
+        properties.put("zookeeper.connect", AppConfiguration.getString("smc.kafka." + module + ".consumer.zk","127.0.0.1:2181").get());
+        properties.put("zookeeper.connectiontimeout.ms", AppConfiguration.getString("smc.kafka." + module + ".consumer.zk.timeout.ms", "10000").get());
         properties.put("group.id", groupId);
 //        properties.put("consumer.timeout.ms", AppConfiguration.getString("smc.kafka." + module + ".consumer.timeout.ms", "10000").get());
-        properties.put("auto.commit.enable", AppConfiguration.getString("smc.kafka." + module + ".auto.commit.enable", "false").get());
-        properties.put("auto.commit.interval.ms", AppConfiguration.getString("smc.kafka." + module + ".auto.commit.interval.ms", "10000").get());
+        properties.put("auto.commit.enable", AppConfiguration.getString("smc.kafka." + module + ".consumer.auto.commit.enable", "false").get());
+        properties.put("auto.commit.interval.ms", AppConfiguration.getString("smc.kafka." + module + ".consumer.auto.commit.interval.ms", "10000").get());
         final int batchSize = AppConfiguration.getInt("smc.kafka." + module + ".concumer.batch.size", 100).get(); //批量消费的大小
         AppConfiguration.getString("smc.kafka." + module + ".consumer.version", "1.0", new Runnable() {
             @Override

@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class LivelyCollect {
 
     static final Logger LOG = LoggerFactory.getLogger(LivelyCollect.class);
-    static TimedCacheFactory<String, Byte> lively_cache = TimedCacheFactory.getInstance("LIVELY_CACHE", 1000000, 60 * 60 * 6);
+    static TimedCacheFactory<String, Byte> lively_cache = TimedCacheFactory.getInstance("LIVELY_CACHE", 1000000, 60 * 60 * 2);
     static KafkaProducer producer = KafkaProducerFactory.getProducer("lively");
 
     public static void collect(LivelyItemEnum livelyItemEnum, long item){

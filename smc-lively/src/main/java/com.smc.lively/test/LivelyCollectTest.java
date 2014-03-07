@@ -20,7 +20,7 @@ public class LivelyCollectTest{
     public static void main(String[] args) throws InterruptedException {
         while(true){
             long cid = counter++;
-            LivelyCollect.collect(LivelyItemEnum.CID_TEST, cid);
+            LivelyCollect.collect(LivelyItemEnum.CID_3_DAY, cid);
             TimeUnit.MILLISECONDS.sleep(100);
         }
 

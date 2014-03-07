@@ -40,6 +40,11 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>com.sohu.smc</groupId>
+            <artifactId>smc-lively</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>com.twitter</groupId>
             <artifactId>ostrich</artifactId>
             <version>9.1.1</version>
